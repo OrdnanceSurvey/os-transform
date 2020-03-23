@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.5.0/proj4.js"></script>
+<script src="os-transform.js"></script>
+<script>
+
+    var p1 = { ea: 337297, no: 503695 };
+    var p2 = { lat: 54.4248023, lng: -2.9679342 };
+
+    console.log(os.Transform.toLatLng(p1));
+    console.log(os.Transform.toLatLng(p1, 14));
+
+    console.log(os.Transform.fromLatLng(p2));
+
+    console.log(os.Transform.toGridRef(p1));
+    console.log(os.Transform.toGridRef(os.Transform.fromLatLng(p2)));
+
+    console.log(os.Transform.fromGridRef("NY 37297 03695"));
+
+</script>
+
+</body>
+</html>
