@@ -1,17 +1,51 @@
-// os-transform.js v0.1.0
+// os-transform.js v0.2.0
 // var proj4 = require('proj4js');
 
-proj4.defs('EPSG:27700', '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs');
+proj4.defs('EPSG:27700', '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs');
 
 window.os = window.os || {};
 
 os.Transform = {
+    // Bounds object (projected and geographic coordinates) for extent of GB.
+    _maxBounds: {
+        projected: [[ 0.0, 0.0 ], [ 699999.9, 1299999.9 ]],
+        geographic: [[ -8.74, 49.84 ], [ 1.96, 60.9 ]]
+    },
+
+    /**
+     * Test whether coordinates are within the permitted bounds.
+     * @param {object} coordinates - The easting + northing or latlng to be validated.
+     */
+    _checkBounds: function(coordinates) {
+        var isValid = true;
+        if( coordinates.hasOwnProperty('ea') && coordinates.hasOwnProperty('no') ) {
+            if( (coordinates.ea < this._maxBounds.projected[0][0] || coordinates.ea > this._maxBounds.projected[1][0])
+                || (coordinates.no < this._maxBounds.projected[0][1] || coordinates.no > this._maxBounds.projected[1][1]) ) {
+                isValid = false;
+            }
+        }
+        else if( coordinates.hasOwnProperty('lat') && coordinates.hasOwnProperty('lng') ) {
+            if( (coordinates.lng < this._maxBounds.geographic[0][0] || coordinates.lng > this._maxBounds.geographic[1][0])
+                || (coordinates.lat < this._maxBounds.geographic[0][1] || coordinates.lat > this._maxBounds.geographic[1][1]) ) {
+                isValid = false;
+            }
+        }
+        var message = isValid ? '' : 'Coordinates out of range.';
+        return { valid: isValid, message: message };
+    },
+
     /**
      * Return latlng from an input easting + northing.
      * @param {object} coordinates - The easting + northing to be transformed.
      * @param {integer} decimals - [optional] The specified number of decimal places.
      */
     toLatLng: function(coordinates, decimals = 7) {
+        var test = this._checkBounds(coordinates)
+        if(! test.valid ) {
+           console.log(test.message);
+           return {};
+        }
+
         var point = proj4('EPSG:27700', 'EPSG:4326', [ coordinates.ea, coordinates.no ]);
 
         var lng = Number(point[0].toFixed(decimals));
@@ -26,6 +60,12 @@ os.Transform = {
      * @param {integer} decimals - [optional] The specified number of decimal places.
      */
     fromLatLng: function(coordinates, decimals = 2) {
+        var test = this._checkBounds(coordinates)
+        if(! test.valid ) {
+           console.log(test.message);
+           return {};
+        }
+
         var point = proj4('EPSG:4326', 'EPSG:27700', [ coordinates.lng, coordinates.lat ]);
 
         var e = Number(point[0].toFixed(decimals));
@@ -39,6 +79,12 @@ os.Transform = {
      * @param {object} coordinates - The easting + northing to be converted.
      */
     toGridRef: function(coordinates) {
+        var test = this._checkBounds(coordinates)
+        if(! test.valid ) {
+           console.log(test.message);
+           return {};
+        }
+
         var prefixes = new Array(
             new Array("SV","SW","SX","SY","SZ","TV","TW"),
             new Array("SQ","SR","SS","ST","SU","TQ","TR"),
@@ -60,8 +106,8 @@ os.Transform = {
 
         var prefix = prefixes[y][x];
 
-        var e = Math.round(coordinates.ea % 100000);
-        var n = Math.round(coordinates.no % 100000);
+        var e = Math.floor(coordinates.ea % 100000); // Math.round(coordinates.ea % 100000);
+        var n = Math.floor(coordinates.no % 100000); // Math.round(coordinates.no % 100000);
 
         e = String(e).padStart(5, '0');
         n = String(n).padStart(5, '0');
