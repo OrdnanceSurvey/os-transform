@@ -1,7 +1,4 @@
-// os-transform.js v0.2.0
-// var proj4 = require('proj4js');
-
-proj4.defs('EPSG:27700', '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs');
+// os-transform.js v0.3.0
 
 window.os = window.os || {};
 
@@ -85,21 +82,21 @@ os.Transform = {
            return {};
         }
 
-        var prefixes = new Array(
-            new Array("SV","SW","SX","SY","SZ","TV","TW"),
-            new Array("SQ","SR","SS","ST","SU","TQ","TR"),
-            new Array("SL","SM","SN","SO","SP","TL","TM"),
-            new Array("SF","SG","SH","SJ","SK","TF","TG"),
-            new Array("SA","SB","SC","SD","SE","TA","TB"),
-            new Array("NV","NW","NX","NY","NZ","OV","OW"),
-            new Array("NQ","NR","NS","NT","NU","OQ","OR"),
-            new Array("NL","NM","NN","NO","NP","OL","OM"),
-            new Array("NF","NG","NH","NJ","NK","OF","OG"),
-            new Array("NA","NB","NC","ND","NE","OA","OB"),
-            new Array("HV","HW","HX","HY","HZ","JV","JW"),
-            new Array("HQ","HR","HS","HT","HU","JQ","JR"),
-            new Array("HL","HM","HN","HO","HP","JL","JM")
-        );
+        var prefixes = [
+            [ 'SV', 'SW', 'SX', 'SY', 'SZ', 'TV', 'TW' ],
+            [ 'SQ', 'SR', 'SS', 'ST', 'SU', 'TQ', 'TR' ],
+            [ 'SL', 'SM', 'SN', 'SO', 'SP', 'TL', 'TM' ],
+            [ 'SF', 'SG', 'SH', 'SJ', 'SK', 'TF', 'TG' ],
+            [ 'SA', 'SB', 'SC', 'SD', 'SE', 'TA', 'TB' ],
+            [ 'NV', 'NW', 'NX', 'NY', 'NZ', 'OV', 'OW' ],
+            [ 'NQ', 'NR', 'NS', 'NT', 'NU', 'OQ', 'OR' ],
+            [ 'NL', 'NM', 'NN', 'NO', 'NP', 'OL', 'OM' ],
+            [ 'NF', 'NG', 'NH', 'NJ', 'NK', 'OF', 'OG' ],
+            [ 'NA', 'NB', 'NC', 'ND', 'NE', 'OA', 'OB' ],
+            [ 'HV', 'HW', 'HX', 'HY', 'HZ', 'JV', 'JW' ],
+            [ 'HQ', 'HR', 'HS', 'HT', 'HU', 'JQ', 'JR' ],
+            [ 'HL', 'HM', 'HN', 'HO', 'HP', 'JL', 'JM' ]
+        ];
 
         var x = Math.floor(coordinates.ea / 100000);
         var y = Math.floor(coordinates.no / 100000);
