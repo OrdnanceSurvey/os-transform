@@ -1,4 +1,4 @@
-// os-transform.js v0.3.0
+// os-transform.js v0.4.0
 
 window.os = window.os || {};
 
@@ -27,7 +27,23 @@ os.Transform = {
                 isValid = false;
             }
         }
+
         var message = isValid ? '' : 'Coordinates out of range.';
+
+        return { valid: isValid, message: message };
+    },
+
+    /**
+     * Test whether a standard grid reference with a valid format has been provided.
+     * param {string} gridref - The grid reference to be validated.
+     */
+     _validateGridRef: function(gridref) {
+        var regex = /^[THJONS][VWXYZQRSTULMNOPFGHJKABCDE] ?[0-9]{1,5} ?[0-9]{1,5}$/;
+        var match = Array.isArray(gridref.toUpperCase().match(regex)) ? true : false;
+
+        var isValid = (gridref.replaceAll(" ", "").length % 2 === 0) && match ? true: false;
+        var message = isValid ? '' : 'Invalid grid reference.';
+
         return { valid: isValid, message: message };
     },
 
@@ -72,7 +88,7 @@ os.Transform = {
     },
 
     /**
-     * Return 1m grid reference [plain & encoded] from an input easting + northing.
+     * Return grid reference [plain | encoded | components] from an input easting + northing.
      * @param {object} coordinates - The easting + northing to be converted.
      */
     toGridRef: function(coordinates) {
@@ -112,32 +128,37 @@ os.Transform = {
         var text = prefix + ' ' + e + ' ' + n,
             html = prefix + '&thinsp;' + e + '&thinsp;' + n;
 
-        return { text: text, html: html };
+        return { text: text, html: html, letters: prefix, eastings: e, northings: n };
     },
 
     /**
-     * Return easting + northing from an input 1m grid reference.
+     * Return easting + northing from an input grid reference.
      * @param {string} gridref - The grid reference to be converted.
      */
     fromGridRef: function(gridref) {
-        var res = gridref.split(' ');
+        gridref = String(gridref).trim();
 
-        var e = Number(res[1]);
-        var n = Number(res[2]);
+        var test = this._validateGridRef(gridref)
+        if(! test.valid ) {
+           console.log(test.message);
+           return {};
+        }
 
-        // 500km reference
-        var t = res[0].substr(0, 1).toLowerCase();
-        var s = 'stnohj';
-        var i = s.indexOf(t);
-        e = e + ((i % 2) * 500000);
-        n = n + (parseInt(i / 2) * 500000);
+        var gridLetters = "VWXYZQRSTULMNOPFGHJKABCDE";
 
-        // 100km reference
-        var t = res[0].substr(1, 1).toLowerCase();
-        var s = 'vwxyzqrstulmnopfghjkabcde';
-        var i = s.indexOf(t);
-        e = e + ((i % 5) * 100000);
-        n = n + (parseInt(i / 5) * 100000);
+        var ref = gridref.toUpperCase().replaceAll(" ", "");
+
+        var majorEasting = gridLetters.indexOf(ref[0]) % 5  * 500000 - 1000000;
+        var majorNorthing = Math.floor(gridLetters.indexOf(ref[0]) / 5) * 500000 - 500000;
+
+        var minorEasting = gridLetters.indexOf(ref[1]) % 5  * 100000;
+        var minorNorthing = Math.floor(gridLetters.indexOf(ref[1]) / 5) * 100000;
+
+        var i = (ref.length-2) / 2;
+        var m = Math.pow(10, 5-i);
+
+        var e = majorEasting + minorEasting + (ref.substr(2, i) * m);
+        var n = majorNorthing + minorNorthing + (ref.substr(i+2, i) * m);
 
         return { ea: e, no: n };
     }

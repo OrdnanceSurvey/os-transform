@@ -82,7 +82,7 @@ os.Transform.fromLatLng({ lat: 54.42480998276385, lng: -2.96793742245737 });
 
 ### os.Transform.toGridRef()
 
-**Description:** Return 1m grid reference [plain & encoded] from an input easting + northing.
+**Description:** Return grid reference [plain | encoded | components] from an input easting + northing.
 
 **Parameters:**
 
@@ -90,12 +90,12 @@ os.Transform.fromLatLng({ lat: 54.42480998276385, lng: -2.96793742245737 });
 
 ```js
 os.Transform.toGridRef({ ea: 337297, no: 503695 });
-// Returns { text: "NY 37297 03695", html: "NY&thinsp;37297&thinsp;03695" }
+// Returns { text: "NY 37297 03695", html: "NY&thinsp;37297&thinsp;03695", letters: "NY", eastings: "37297", northings: "03695" }
 ```
 
 ### os.Transform.fromGridRef()
 
-**Description:** Return easting + northing from an input 1m grid reference.
+**Description:** Return easting + northing from an input grid reference.
 
 **Parameters:**
 
@@ -118,6 +118,11 @@ os.Transform.fromGridRef("NY 37297 03695");
 - Included support for grid based datum adjustments.
 - Minor code refactoring.
 - Additional usage examples provided.
+
+**Version 0.4.0** (March 2021)
+- Added support for 4-figure to 12-figure grid references.
+- Updated to include `_validateGridRef()` function, which validates input grid references.
+- `toGridRef()` function includes components (letters, eastings + northings) of grid reference in returned object.
 
 ## Notes
 
